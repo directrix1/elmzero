@@ -10,12 +10,7 @@ module ElmZero exposing (..)
 import Html exposing (h1, text)
 import Html.Attributes exposing (id)
 
-{-| The main run loop
-
-# The main run loop runs the game
-@docs main
-
--}
+{-| The main run loop -}
 main : Html.Html a
 main =
   h1 [id "hw"] [text "Hello World!"]
