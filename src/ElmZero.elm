@@ -27,7 +27,7 @@ type alias Model =
 
 initModel : Model
 initModel = { position = {x = 512.0, y = 0.0}
-            , facing = pi / 2
+            , facing = 3 * pi / 2
             , turnRate = pi / 30
             , wWidth = 1920
             , wHeight = 1080
@@ -39,11 +39,11 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         UpPressed ->
-            ( { model | position = {x = model.position.x + (cos model.facing), y = model.position.y + (sin model.facing)}}
+            ( { model | position = {x = model.position.x - (cos model.facing), y = model.position.y - (sin model.facing)}}
             , Cmd.none
             )
         DownPressed ->
-            ( { model | position = {x = model.position.x - (cos model.facing), y = model.position.y - (sin model.facing)}}
+            ( { model | position = {x = model.position.x + (cos model.facing), y = model.position.y + (sin model.facing)}}
             , Cmd.none
             )
         LeftPressed ->
@@ -87,7 +87,7 @@ view model =
       svg
         [ version "1.1", x "0", y "0", width (toString <| model.wWidth - 10), height (toString <| model.wHeight - 10)
         ]
-        [   g [transform ("translate(" ++ (toString ((toFloat model.wWidth) / 2)) ++ " " ++ (toString model.wHeight) ++ ") rotate(" ++ (toString -((model.facing * 180 / pi) + 90)) ++ ") translate(" ++ (toString (-model.position.x)) ++ " " ++ (toString (-model.position.y)) ++ ")")]
+        [   g [transform ("translate(" ++ (toString ((toFloat model.wWidth) / 2)) ++ " " ++ (toString model.wHeight) ++ ") rotate(" ++ (toString -((model.facing * 180 / pi) - 90)) ++ ") translate(" ++ (toString (-model.position.x)) ++ " " ++ (toString (-model.position.y)) ++ ")")]
             [   image [x "0", y "0", width "1024px", height "1024px", xlinkHref "../resources/lava.png"] []
             ]
         ]
