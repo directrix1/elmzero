@@ -71,7 +71,9 @@ update msg model =
             , Cmd.none
             )
         Tick time ->
-            ( { model | position = {x = model.position.x + (model.xVelocity * time), y = model.position.y + (model.yVelocity * time)}}
+            ( let m = model
+                in
+                { m | position = {x = m.position.x + (m.xVelocity * time), y = m.position.y + (m.yVelocity * time)}}
             , Cmd.none
             )
 
