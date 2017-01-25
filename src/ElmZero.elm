@@ -37,18 +37,20 @@ type alias Model =
     , yVelocity : Float
     , acceleration : Float
     , mapTexture : Maybe Texture
+    , mapScale : Float
     }
 
 initModel : Model
-initModel = { position = {x = 512.0, y = 0.0}
-            , facing = 3 * pi / 2
+initModel = { position = {x = 0.0, y = 0.0}
+            , facing = 0.0
             , turnRate = pi / 60
             , wWidth = 1920
             , wHeight = 1080
             , xVelocity = 0
             , yVelocity = 0
-            , acceleration = 0.001
+            , acceleration = 0.0001
             , mapTexture = Nothing
+            , mapScale = 100
             }
 
 type Msg = UpPressed | DownPressed | LeftPressed | RightPressed | NothingPressed | WinSize (Int, Int) | Tick Time | TextureLoaded (Result Error Texture)
@@ -57,11 +59,11 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         UpPressed ->
-            ( { model | xVelocity = model.xVelocity - (cos model.facing) * model.acceleration, yVelocity = model.yVelocity - (sin model.facing) * model.acceleration}
+            ( { model | xVelocity = model.xVelocity - (sin model.facing) * model.acceleration, yVelocity = model.yVelocity - (cos model.facing) * model.acceleration}
             , Cmd.none
             )
         DownPressed ->
-            ( { model | xVelocity = model.xVelocity + (cos model.facing) * model.acceleration, yVelocity = model.yVelocity + (sin model.facing) * model.acceleration}
+            ( { model | xVelocity = model.xVelocity + (sin model.facing) * model.acceleration, yVelocity = model.yVelocity + (cos model.facing) * model.acceleration}
             , Cmd.none
             )
         LeftPressed ->
@@ -81,9 +83,12 @@ update msg model =
             , Cmd.none
             )
         Tick time ->
-            ( let m = model
+            ( let
+                    m = model
+                    maxP = model.mapScale
+                    minP = -maxP
                 in
-                { m | position = {x = m.position.x + (m.xVelocity * time), y = m.position.y + (m.yVelocity * time)}}
+                    { m | position = {x = (min maxP (max minP m.position.x + (m.xVelocity * time))), y = (min maxP (max minP m.position.y + (m.yVelocity * time)))}}
             , Cmd.none
             )
         TextureLoaded texResult ->
@@ -126,7 +131,13 @@ type alias Vertex = { position : Vec3
 scene : Model -> Texture -> List Entity
 scene model texture =
     let
-        perspective = Mat4.identity
+        perspective = Mat4.mul
+            (Mat4.makePerspective 30 (toFloat model.wWidth / toFloat model.wHeight) 0.01 100)
+            (Mat4.identity
+                |> Mat4.rotate (pi / -2.2) Vec3.i
+                |> Mat4.rotate model.facing Vec3.k
+                |> Mat4.translate (vec3 model.position.x model.position.y 0)
+                |> Mat4.scale (vec3 model.mapScale model.mapScale 1))
         {-
             Mat4.mul
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
@@ -149,16 +160,16 @@ square : List (Vertex, Vertex, Vertex)
 square =
     let
         topLeft =
-            Vertex (vec3 -1 1 -1) (vec2 0 1)
+            Vertex (vec3 -1 1 -0.5) (vec2 0 1)
 
         topRight =
-            Vertex (vec3 1 1 -1) (vec2 1 1)
+            Vertex (vec3 1 1 -0.5) (vec2 1 1)
 
         bottomLeft =
-            Vertex (vec3 -1 -1 -1) (vec2 0 0)
+            Vertex (vec3 -1 -1 -0.5) (vec2 0 0)
 
         bottomRight =
-            Vertex (vec3 1 -1 -1) (vec2 1 0)
+            Vertex (vec3 1 -1 -0.5) (vec2 1 0)
     in
         [ ( topLeft, topRight, bottomLeft )
         , ( bottomLeft, topRight, bottomRight )
