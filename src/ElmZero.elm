@@ -55,19 +55,19 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         UpPressed ->
-            ( { model | xVelocity = model.xVelocity - (sin model.facing) * model.acceleration, yVelocity = model.yVelocity - (cos model.facing) * model.acceleration}
-            , Cmd.none
-            )
-        DownPressed ->
             ( { model | xVelocity = model.xVelocity + (sin model.facing) * model.acceleration, yVelocity = model.yVelocity + (cos model.facing) * model.acceleration}
             , Cmd.none
             )
+        DownPressed ->
+            ( { model | xVelocity = model.xVelocity - (sin model.facing) * model.acceleration, yVelocity = model.yVelocity - (cos model.facing) * model.acceleration}
+            , Cmd.none
+            )
         LeftPressed ->
-            ( { model | facing = model.facing + model.turnRate}
+            ( { model | facing = model.facing - model.turnRate}
             , Cmd.none
             )
         RightPressed ->
-            ( { model | facing = model.facing - model.turnRate}
+            ( { model | facing = model.facing + model.turnRate}
             , Cmd.none
             )
         NothingPressed ->
@@ -119,7 +119,7 @@ scene model texture =
         perspective = Mat4.mul
             (Mat4.makePerspective 30 (toFloat model.wWidth / toFloat model.wHeight) 0.01 100)
             (Mat4.identity
-                |> Mat4.rotate (pi / -2.2) Vec3.i
+                |> Mat4.rotate (pi / 1.9) Vec3.i
                 |> Mat4.rotate model.facing Vec3.k
                 |> Mat4.translate (vec3 model.position.x model.position.y 0)
                 |> Mat4.scale (vec3 model.mapScale model.mapScale 1))
@@ -140,16 +140,16 @@ square : List (Vertex, Vertex, Vertex)
 square =
     let
         topLeft =
-            Vertex (vec3 -1 1 -0.5) (vec2 0 1)
+            Vertex (vec3 -1 1 0.5) (vec2 0 1)
 
         topRight =
-            Vertex (vec3 1 1 -0.5) (vec2 1 1)
+            Vertex (vec3 1 1 0.5) (vec2 1 1)
 
         bottomLeft =
-            Vertex (vec3 -1 -1 -0.5) (vec2 0 0)
+            Vertex (vec3 -1 -1 0.5) (vec2 0 0)
 
         bottomRight =
-            Vertex (vec3 1 -1 -0.5) (vec2 1 0)
+            Vertex (vec3 1 -1 0.5) (vec2 1 0)
     in
         [ ( topLeft, topRight, bottomLeft )
         , ( bottomLeft, topRight, bottomRight )
