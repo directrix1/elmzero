@@ -48,10 +48,10 @@ initModel = { position = {x = 0.0, y = 0.0}
             , xVelocity = 0
             , yVelocity = 0
             , velocity = 0
-            , maxVelocity = 0.02
+            , maxVelocity = 0.04
             , acceleration = 0.00001
             , mapTexture = Nothing
-            , mapScale = 100
+            , mapScale = 500
             , moves = {x = 0, y = 0}
             }
 
@@ -159,16 +159,16 @@ square : List (Vertex, Vertex, Vertex)
 square =
     let
         topLeft =
-            Vertex (vec3 -1 1 0.5) (vec2 0 1)
+            Vertex (vec3 -1 1 1) (vec2 0 1)
 
         topRight =
-            Vertex (vec3 1 1 0.5) (vec2 1 1)
+            Vertex (vec3 1 1 1) (vec2 1 1)
 
         bottomLeft =
-            Vertex (vec3 -1 -1 0.5) (vec2 0 0)
+            Vertex (vec3 -1 -1 1) (vec2 0 0)
 
         bottomRight =
-            Vertex (vec3 1 -1 0.5) (vec2 1 0)
+            Vertex (vec3 1 -1 1) (vec2 1 0)
     in
         [ ( topLeft, topRight, bottomLeft )
         , ( bottomLeft, topRight, bottomRight )
