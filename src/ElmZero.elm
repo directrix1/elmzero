@@ -32,47 +32,47 @@ type alias Model =
     , xVelocity : Float
     , yVelocity : Float
     , velocity : Float
+    , maxVelocity : Float
     , acceleration : Float
     , mapTexture : Maybe Texture
     , mapScale : Float
+    , moves : { x : Float, y : Float }
     }
 
 initModel : Model
 initModel = { position = {x = 0.0, y = 0.0}
             , facing = 0.0
-            , turnRate = pi / 60
+            , turnRate = pi / 6000
             , wWidth = 1920
             , wHeight = 1080
             , xVelocity = 0
             , yVelocity = 0
             , velocity = 0
-            , acceleration = 0.0001
+            , maxVelocity = 0.02
+            , acceleration = 0.00001
             , mapTexture = Nothing
             , mapScale = 100
+            , moves = {x = 0, y = 0}
             }
 
-type Msg = UpPressed | DownPressed | LeftPressed | RightPressed | NothingPressed | WinSize (Int, Int) | Tick Time | TextureLoaded (Result Error Texture)
+type Msg = XMove Float | YMove Float | NoMove | WinSize (Int, Int) | Tick Time | TextureLoaded (Result Error Texture)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        UpPressed ->
-            ( { model | velocity = model.velocity + model.acceleration}
+        YMove direction ->
+            ( let m = model.moves
+                in
+                { model | moves = { m | y = direction } }
             , Cmd.none
             )
-        DownPressed ->
-            ( { model | velocity = model.velocity - model.acceleration}
+        XMove direction ->
+            ( let m = model.moves
+                in
+                { model | moves = { m | x = direction } }
             , Cmd.none
             )
-        LeftPressed ->
-            ( { model | facing = model.facing - model.turnRate}
-            , Cmd.none
-            )
-        RightPressed ->
-            ( { model | facing = model.facing + model.turnRate}
-            , Cmd.none
-            )
-        NothingPressed ->
+        NoMove ->
             ( model
             , Cmd.none
             )
@@ -83,12 +83,18 @@ update msg model =
         Tick time ->
             ( let
                     m = model
-                    maxP = model.mapScale
+                    maxP = m.mapScale
                     minP = -maxP
-                    xVelocity = m.xVelocity + (sin model.facing) * model.velocity
-                    yVelocity = m.yVelocity + (cos model.facing) * model.velocity
+                    maxV = m.maxVelocity
+                    facing = m.facing + m.moves.x * m.turnRate * time
+                    velocity = (min maxV (max -maxV (m.velocity + m.moves.y * m.acceleration * time)))
+                    xVelocity = m.xVelocity + (sin facing) * velocity
+                    yVelocity = m.yVelocity + (cos facing) * velocity
                 in
-                    { m | position = {x = (min maxP (max minP m.position.x + (xVelocity * time))), y = (min maxP (max minP m.position.y + (yVelocity * time)))}}
+                    { m | position = {x = (min maxP (max minP m.position.x + (xVelocity * time))), y = (min maxP (max minP m.position.y + (yVelocity * time)))}
+                        , facing = facing
+                        , velocity = velocity
+                    }
             , Cmd.none
             )
         TextureLoaded texResult ->
@@ -100,11 +106,20 @@ subscriptions _ =
         [ Keyboard.downs
             (
             \kc -> case kc of
-                37 -> RightPressed
-                38 -> UpPressed
-                39 -> LeftPressed
-                40 -> DownPressed
-                _ -> NothingPressed
+                37 -> XMove 1
+                38 -> YMove 1
+                39 -> XMove -1
+                40 -> YMove -1
+                _ -> NoMove
+            )
+        , Keyboard.ups
+            (
+            \kc -> case kc of
+                37 -> XMove 0
+                38 -> YMove 0
+                39 -> XMove 0
+                40 -> YMove 0
+                _ -> NoMove
             )
         , Window.resizes (\size -> (WinSize (size.width, size.height)))
         , diffs Tick
