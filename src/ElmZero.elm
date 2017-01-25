@@ -21,10 +21,6 @@ import WebGL.Texture as Texture exposing (Texture, Error)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector2 as Vec2 exposing (Vec2, vec2)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
-{-
-import Svg exposing (..)
-import Svg.Attributes exposing (..)
--}
 
 type alias Position = {x: Float, y: Float}
 type alias Model =
@@ -112,17 +108,6 @@ subscriptions _ =
 
 winsizeToMsg : Window.Size -> Msg
 winsizeToMsg size = WinSize (size.width, size.height)
-{-
-view : Model -> (Html Msg)
-view model =
-      svg
-        [ version "1.1", x "0", y "0", width (toString <| model.wWidth - 10), height (toString <| model.wHeight - 10)
-        ]
-        [ g [transform ("translate(" ++ (toString ((toFloat model.wWidth) / 2)) ++ " " ++ (toString model.wHeight) ++ ") rotate(" ++ (toString -((model.facing * 180 / pi) - 90)) ++ ") translate(" ++ (toString (-model.position.x)) ++ " " ++ (toString (-model.position.y)) ++ ")")]
-            [   image [x "0", y "0", width "1024px", height "1024px", xlinkHref "../resources/lava.png"] []
-            ]
-        ]
--}
 
 type alias Vertex = { position : Vec3
                     , coord : Vec2
@@ -138,11 +123,6 @@ scene model texture =
                 |> Mat4.rotate model.facing Vec3.k
                 |> Mat4.translate (vec3 model.position.x model.position.y 0)
                 |> Mat4.scale (vec3 model.mapScale model.mapScale 1))
-        {-
-            Mat4.mul
-                (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
-                (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
-        -}
     in
         [ WebGL.entity
             vertexShader
