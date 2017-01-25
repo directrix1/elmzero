@@ -31,6 +31,7 @@ type alias Model =
     , wHeight : Int
     , xVelocity : Float
     , yVelocity : Float
+    , velocity : Float
     , acceleration : Float
     , mapTexture : Maybe Texture
     , mapScale : Float
@@ -44,6 +45,7 @@ initModel = { position = {x = 0.0, y = 0.0}
             , wHeight = 1080
             , xVelocity = 0
             , yVelocity = 0
+            , velocity = 0
             , acceleration = 0.0001
             , mapTexture = Nothing
             , mapScale = 100
@@ -55,11 +57,11 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         UpPressed ->
-            ( { model | xVelocity = model.xVelocity + (sin model.facing) * model.acceleration, yVelocity = model.yVelocity + (cos model.facing) * model.acceleration}
+            ( { model | velocity = model.velocity + model.acceleration}
             , Cmd.none
             )
         DownPressed ->
-            ( { model | xVelocity = model.xVelocity - (sin model.facing) * model.acceleration, yVelocity = model.yVelocity - (cos model.facing) * model.acceleration}
+            ( { model | velocity = model.velocity - model.acceleration}
             , Cmd.none
             )
         LeftPressed ->
@@ -83,8 +85,10 @@ update msg model =
                     m = model
                     maxP = model.mapScale
                     minP = -maxP
+                    xVelocity = m.xVelocity + (sin model.facing) * model.velocity
+                    yVelocity = m.yVelocity + (cos model.facing) * model.velocity
                 in
-                    { m | position = {x = (min maxP (max minP m.position.x + (m.xVelocity * time))), y = (min maxP (max minP m.position.y + (m.yVelocity * time)))}}
+                    { m | position = {x = (min maxP (max minP m.position.x + (xVelocity * time))), y = (min maxP (max minP m.position.y + (yVelocity * time)))}}
             , Cmd.none
             )
         TextureLoaded texResult ->
